@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Счётчик помощи по квартире</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #e6e9f2;
+      --green: #20a66a;
+      --blue: #356df3;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --shadow: 0 18px 45px rgba(23, 32, 51, 0.10);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(53, 109, 243, 0.14), transparent 32%),
+        radial-gradient(circle at top right, rgba(32, 166, 106, 0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #ffffff, #f8faff);
+      border: 1px solid rgba(230, 233, 242, 0.9);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eef4ff;
+      color: #2457d6;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.55;
+      max-width: 760px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 25px;
+      letter-spacing: -0.03em;
+    }
+
+    .stat.done strong { color: var(--green); }
+    .stat.left strong { color: var(--blue); }
+    .stat.waiting strong { color: var(--orange); }
+
+    .progress-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+      margin-bottom: 18px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 12px;
+    }
+
+    .progress-top h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .progress-top p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .percent {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .bar {
+      height: 18px;
+      background: #e8edf7;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #dce3f2;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green), #5fd19c);
+      border-radius: 999px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+    }
+
+    .section-header {
+      padding: 22px 22px 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.green {
+      color: #087047;
+      background: #e9f8f1;
+    }
+
+    .pill.orange {
+      color: #9a5a00;
+      background: #fff5df;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 14px 22px;
+      background: #fafbfe;
+      border-bottom: 1px solid var(--line);
+    }
+
+    td {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .amount {
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status.done {
+      background: #e9f8f1;
+      color: #087047;
+    }
+
+    .status.waiting {
+      background: #fff5df;
+      color: #9a5a00;
+    }
+
+    .note {
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      color: var(--muted);
+      line-height: 1.55;
+      box-shadow: 0 10px 24px rgba(23, 32, 51, 0.05);
+    }
+
+    .note b {
+      color: var(--text);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 22px 0 6px;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 18px 12px;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .progress-top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      th:nth-child(1),
+      td:nth-child(1) {
+        display: none;
+      }
+
+      th, td {
+        padding: 14px;
+      }
+
+      .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .stat strong {
+        font-size: 23px;
+      }
+
+      th:nth-child(4),
+      td:nth-child(4) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">🏠 Помощь по квартире</div>
+      <h1>Счётчик выполненных дел</h1>
+      <p class="subtitle">
+        Здесь отмечены выполненные дела и дела в ожидании. Это простой список для прозрачности,
+        чтобы всем было понятно, какая сумма уже списана и сколько осталось.
+      </p>
+    </section>
+
+    <section class="summary" aria-label="Общая статистика">
+      <div class="stat">
+        <span>Всего помощи</span>
+        <strong id="totalHelp">0 лей</strong>
+      </div>
+      <div class="stat done">
+        <span>Уже списано</span>
+        <strong id="doneSum">0 лей</strong>
+      </div>
+      <div class="stat left">
+        <span>Осталось сейчас</span>
+        <strong id="leftNow">0 лей</strong>
+      </div>
+      <div class="stat waiting">
+        <span>В ожидании</span>
+        <strong id="waitingSum">0 лей</strong>
+      </div>
+    </section>
+
+    <section class="progress-card">
+      <div class="progress-top">
+        <div>
+          <h2>Прогресс</h2>
+          <p id="progressText">Выполнено 0 из 0 лей</p>
+        </div>
+        <div class="percent" id="progressPercent">0%</div>
+      </div>
+      <div class="bar" aria-label="Прогресс списания">
+        <div class="bar-fill" id="barFill"></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="section">
+        <div class="section-header">
+          <h2>✅ Выполненные дела</h2>
+          <span class="pill green" id="doneCount">0 дел</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Дело</th>
+              <th>Сумма</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="doneTable"></tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>⏳ В ожидании</h2>
+          <span class="pill orange" id="waitingCount">0 дел</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Дело</th>
+              <th>Сумма</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="waitingTable"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="note">
+      <b>Пояснение:</b> это не публичный документ и не давление. Это удобный счётчик помощи:
+      выполненные дела уменьшают общий остаток. Личные данные, адрес квартиры и телефоны лучше здесь не писать.
+    </section>
+
+    <footer>
+      Последнее обновление: <span id="updatedAt"></span>
+    </footer>
+  </main>
+
+  <script>
+    // ====== РЕДАКТИРОВАТЬ ЗДЕСЬ ======
+
+    const total = 7000;
+
+    const doneTasks = [
+      {
+        text: "Фоткать счётчики воды каждый месяц до августа",
+        amount: 1200
+      },
+      {
+        text: "Если приедет матрас — принять его и подержать у себя",
+        amount: 200
+      },
+      {
+        text: "Человек придёт подключать интернет — открыть ему дверь",
+        amount: 200
+      }
+    ];
+
+    const waitingTasks = [
+      {
+        text: "Когда будут красить стены — прийти открыть дверь мастерам",
+        amount: 200
+      }
+    ];
+
+    // ====== НИЖЕ МОЖНО НЕ ТРОГАТЬ ======
+
+    const formatLei = (value) => `${value.toLocaleString("ru-RU")} лей`;
+
+    const sum = (tasks) => tasks.reduce((acc, task) => acc + task.amount, 0);
+
+    const done = sum(doneTasks);
+    const waiting = sum(waitingTasks);
+    const left = Math.max(total - done, 0);
+    const leftAfterWaiting = Math.max(total - done - waiting, 0);
+    const progress = Math.min(Math.round((done / total) * 100), 100);
+
+    document.getElementById("totalHelp").textContent = formatLei(total);
+    document.getElementById("doneSum").textContent = formatLei(done);
+    document.getElementById("leftNow").textContent = formatLei(left);
+    document.getElementById("waitingSum").textContent = formatLei(waiting);
+    document.getElementById("progressText").textContent =
+      `Списано ${formatLei(done)} из ${formatLei(total)}. После дел в ожидании останется ${formatLei(leftAfterWaiting)}.`;
+    document.getElementById("progressPercent").textContent = `${progress}%`;
+    document.getElementById("barFill").style.width = `${progress}%`;
+    document.getElementById("doneCount").textContent = `${doneTasks.length} ${doneTasks.length === 1 ? "дело" : "дела"}`;
+    document.getElementById("waitingCount").textContent = `${waitingTasks.length} ${waitingTasks.length === 1 ? "дело" : "дела"}`;
+
+    function renderRows(tableId, tasks, statusText, statusClass) {
+      const table = document.getElementById(tableId);
+      table.innerHTML = "";
+
+      tasks.forEach((task, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${task.text}</td>
+          <td class="amount">${formatLei(task.amount)}</td>
+          <td><span class="status ${statusClass}">${statusText}</span></td>
+        `;
+        table.appendChild(tr);
+      });
+    }
+
+    renderRows("doneTable", doneTasks, "Выполнено", "done");
+    renderRows("waitingTable", waitingTasks, "В ожидании", "waiting");
+
+    document.getElementById("updatedAt").textContent =
+      new Date().toLocaleDateString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+  </script>
+</body>
+</html>
